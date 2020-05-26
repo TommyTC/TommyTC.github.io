@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Just love u</title>
+</head>
+<body>
+    <div class="wrapper">
+        <svg width="100%">
+            <text text-anchor="middle" x="50%" y="50%" class="text text-1">
+                4 my all life
+            </text>
+            <text text-anchor="middle" x="50%" y="50%" class="text text-2">
+                4 my all life
+            </text>
+            <text text-anchor="middle" x="50%" y="50%" class="text text-3">
+                4 my all life
+            </text>
+            <text text-anchor="middle" x="50%" y="50%" class="text text-4">
+                4 my all life
+            </text>
+        </svg> 
+        <span style="float: left;left: -50%;position: relative;"></span>
+    </div>
+    <canvas id="canvas" ></canvas>
+</body>
+<script>
+
+    let Heart = class Heart{
+        constructor(heartWidth,blockMargin,blockWidthCount,outX,outY){
+            this.blockWidthCount = blockWidthCount;
+            this.blockStyle = this.randomStyle();
+            this.blockMargin = blockMargin;
+            this.heartWidth = heartWidth;
+            this.heartHeight = 0;
+            this.heartX = 0;
+            this.heartY = 0;
+            this.originX = 0;
+            this.originY = 0;
+            this.blockOutWidth = this.heartWidth/this.blockWidthCount;
+            this.blockWidth = this.blockOutWidth-this.blockMargin;
+            this.blocks = []
+            this.offsetX = this.blockOutWidth;
+            this.offsetY = this.blockOutWidth;
+            this.timer = 0;
+            this.impactCount = Math.random()*6+3;
+            this.impactTime = Math.random()*200+100;
+            this.status = 0;
+
+            var half = this.blockWidthCount/2;
+            // var outX = canvasWidth/2-this.heartWidth/2
+            if(outX+this.heartWidth>canvasWidth){
+                outX = canvasWidth-this.heartWidth;
+            }else{
+                outX = outX-this.heartWidth/2;
+            }
+            if(outY+this.heartHeight>canvasHeight){
+                outY = canvasHeight-this.heartHeight;
+            }else{
+                outY = outY-this.heartHeight/2;
+            }
+            var x = outX;
+            this.heartX = x+this.blockOutWidth;
+            this.originX = this.heartX;
+            var y = half*this.blockOutWidth+outY;
+            for (let index = 0; index < half/2; index++) {
+                x+=this.blockOutWidth;
+                y-=this.blockOutWidth;
+                this.createBlocks(x,y,this.blockWidthCount/2-2*index) 
+            }
+            this.heartY = y;
+            this.originY = this.heartY;
+
+
+            x = half*this.blockOutWidth+outX;
+            y = half*this.blockOutWidth+outY;
+            for (let index = 0; index < half/2; index++) {
+                x+=this.blockOutWidth;
+                y-=this.blockOutWidth;
+                this.createBlocks(x,y,this.blockWidthCount/2-2*index) 
+                this.heartHeight+=this.blockOutWidth
+            }
+
+            x = outX;
+            y = half*this.blockOutWidth+outY
+            for (let index = 0; index < half; index++) {
+                x+=this.blockOutWidth;
+                this.createBlocks(x,y,this.blockWidthCount-2*index) 
+                y+=this.blockOutWidth;
+                this.heartHeight+=this.blockOutWidth
+            }
+
+            this.randomStyle();
+            
+        }
+
+        createBlocks(x,y,count){
+            if(count<1){
+                return;
+            }
+            for (let index = 0; index < count; index++) { 
+                let block = new Block(x,y,this.blockWidth);
+                this.blocks.push(block);
+                x=x+this.blockMargin+this.blockWidth;   
+            }
+        }
+
+        performMerge(outX,outY){
+            this.timer = this.impactTime+10;
+            let distanceX = outX - this.originX;
+            let distanceY = outY - this.originY;
+            this.originX = outX;
+            this.originY = outY;
+            this.blocks.forEach(item => {
+                item.originX = item.originX+distanceX;
+                item.originY = item.originY+distanceY;
+                item.draw();
+            });
+        }
+
+        drawBlocks(){
+            this.blocks.forEach(item => {
+                item.blockStyle = this.blockStyle;
+                item.draw();
+            });
+            ctx.strokeStyle = 'gray';
+            ctx.strokeRect(this.heartX,this.heartY,this.heartWidth,this.heartHeight);
+        }
+
+        frame(){
+            // console.log(this.heartX,this.heartY,this.heartWidth,this.heartHeight);
+            
+            if(this.impactCount>0){
+                this.group();
+                this.status = 0;
+            }else if(this.timer>this.impactTime){
+                if(this.merge()){
+                    this.timer = 0;
+                    this.impactCount = 0;
+                    this.heartX = this.originX;
+                    this.heartY = this.originY;
+                    this.impactCount = Math.random()*6+3;
+                    this.impactTime = Math.random()*200+100;
+                    this.blocks.forEach(item => {
+                        item.blur = false;
+                    }); 
+                    this.status = 2;
+                }
+            }else{
+                this.timer++;
+                this.scatter();
+                this.status = 1;
+            }
+        }
+
+        merge(){
+            var complete = true;
+            this.blocks.forEach(item => {
+                item.return();
+                complete = complete && item.complete;
+                item.draw();
+            });
+            return complete;
+        }
+
+        scatter(){
+            this.blocks.forEach(item => {
+                if(item.x+item.offsetX<0||item.x+this.blockOutWidth+item.offsetX>canvasWidth){
+                    item.offsetX*=-1;
+                    item.blockStyle = this.randomBlockStyle();
+                }
+                if(item.y+item.offsetY<0||item.y+this.blockOutWidth+item.offsetY>canvasHeight){
+                    item.offsetY*=-1;
+                    item.blockStyle = this.randomBlockStyle();
+                }
+                item.x+=item.offsetX;
+                item.y+=item.offsetY;
+                item.draw();
+            });
+        }
+
+        group(){
+            let oldX = this.heartX;
+            let oldY = this.heartY;
+            if(this.heartX+this.offsetX<0||this.heartX+this.heartWidth+this.offsetX>canvasWidth){
+                this.offsetX*=-1;
+                this.blockStyle = this.randomStyle();
+                this.impactCount--;
+            }
+            if(this.heartY+this.offsetY<0||this.heartY+this.heartHeight+this.offsetY>canvasHeight){
+                this.offsetY*=-1;
+                this.blockStyle = this.randomStyle();
+                this.impactCount--;
+            }
+            this.heartX += this.offsetX;
+            this.heartY += this.offsetY;
+            this.blocks.forEach(item => {
+                item.x = item.x-oldX+this.heartX;
+                item.y = item.y-oldY+this.heartY;
+                item.blockStyle = this.blockStyle;
+                item.draw();
+            });
+            if(this.impactCount<0){
+                this.blocks.forEach(item => {
+                    item.offsetX = this.offsetX*Math.random();
+                    item.offsetY = this.offsetY*Math.random();
+                    item.blur = true;
+                }); 
+            }
+
+            // ctx.strokeStyle = 'gray';
+            // ctx.strokeRect(this.heartX,this.heartY,this.heartWidth,this.heartHeight);
+        }
+
+        randomStyle(){
+            return 'rgb(' + (Math.random()*155+100) + ',' + 
+            (Math.random()*55+100) + ','+(Math.random()*55+100)+')';
+        }
+
+        randomBlockStyle(){
+            return 'rgba(' + (Math.random()*155+100) + ',' + 
+            (Math.random()*55+100) + ','+(Math.random()*55+100)+',0.4)';
+        }
+
+    }
+
+
+    let Block = class Block{
+        constructor(x,y,width){
+            this.x = x;
+            this.y = y;
+            this.originX = x;
+            this.originY = y;
+            this.step = 0.0;
+            this.offsetX = Math.random()*width;
+            this.offsetY = Math.random()*width;
+            this.returnStartX = 0;
+            this.returnStartY = 0;
+            this.complete;
+            this.width = width;
+            this.blockStyle = 'green'
+            this.shadowBlur = width*2;
+            this.blur = false;
+        }
+
+        draw(){
+                if(this.blur){
+                    ctx.shadowColor = "RGBA(200,200,200,1)";
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
+                    ctx.shadowBlur = this.shadowBlur;
+                }else{
+                    ctx.shadowBlur = null;
+                }
+                ctx.fillStyle = this.blockStyle;
+                ctx.fillRect(this.x, this.y, this.width, this.width);
+            }
+
+        return(){
+            if(this.step>1){
+                this.complete = true;
+                this.step = 0.0;
+                return;
+            }else if(this.step<0.1){
+                this.returnStartX = this.x;
+                this.returnStartY = this.y;
+            }
+            if(this.step>0.99){
+                this.step = 1;
+            }
+            this.x = this.returnStartX+(this.originX-this.returnStartX)*this.getInterpolation(this.step,1.0);
+            this.y = this.returnStartY+(this.originY-this.returnStartY)*this.getInterpolation(this.step,1.0);
+            // console.log(this.step,this.x,this.y)
+            this.step+=0.1;
+            this.complete = false;
+        }
+
+        getInterpolation(input,factor) {
+            var result;
+            if (factor == 1.0) {
+                result = (1.0 - (1.0 - input) * (1.0 - input));
+            } else {
+                result = (1.0 - Math.pow((1.0 - input), 2 * factor));
+            }
+            if(result>0.99){
+                result = 1;
+            }else if(result<0.1){
+                result = 0.1;
+            }
+            return result;
+        }
+    }
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');    
+    const canvasHeight = window.innerHeight;
+    const canvasWidth = window.innerWidth;
+    let timerId = 0;
+
+    canvas.addEventListener('click',onCanvasClick)
+
+    canvas.setAttribute('width',canvasWidth)
+    canvas.setAttribute('height',canvasHeight)
+
+    const hearts = [];
+    // let heart = new Heart(canvasWidth/2,6,12,10);
+    // let heart2 = new Heart(canvasWidth/3,6,10,20);
+    // let heart3 = new Heart(canvasWidth/8,2,8,30);
+    // heart.drawBlocks();
+    play();
+    function play(){
+            timrId = setInterval(()=>{
+                ctx.clearRect(0,0,canvasWidth,canvasHeight);
+                hearts.forEach(item=>{
+                    item.frame();
+                });
+            },100);
+        }
+
+    function onCanvasClick(event){
+        var target = 0;
+        if(canvasWidth>canvasHeight){
+            target = canvasHeight;
+        }else{
+            target = canvasWidth;
+        }
+        var hasScatterHeart = false;
+        for (const index in hearts) {
+            if (hearts.hasOwnProperty(index)) {
+                const item = hearts[index];
+                if(item.status==1){
+                    hasScatterHeart = true;
+                    item.performMerge(event.x,event.y);
+                    break;
+                }
+            }
+        }
+        if(!hasScatterHeart){
+            hearts.push(new Heart(target/(Math.random()*4+4),Math.random()*4+4,Math.random()*6+6,event.x,event.y));
+        }
+    }
+</script>
+<style>
+    html,body{
+        width: 100%;
+        height: 100%;
+        padding: 0px;
+        margin: 0px;
+        background-color: #2f2f2f;
+    }
+    #canvas{
+        width: auto;
+        float: left;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+    }
+    .wrapper{
+        left: 10%; 
+        top: 50%;
+        position: relative;
+        display: block;
+    }
+    .text{
+        font-size: 100px;
+        fill: none;
+        stroke-width: 2pt;
+        stroke-dasharray: 90 310;
+        animation: stroke 8s infinite linear;
+    }
+    .text-1{
+        stroke: #def2ff;
+        text-shadow: 0 0 50px #3498db;
+        animation-delay: -1.5s;
+    }
+    .text-2{
+        stroke: #def2ff66;
+        text-shadow: 0 0 50px #3498db;
+        animation-delay: -3s;
+    }
+    .text-3{
+        stroke: #f1cfff;
+        text-shadow: 0 0 50px #9b59b6;
+        animation-delay: -4.5s;
+    }
+    .text-4{
+        stroke: #f1cfff66;
+        text-shadow: 0 0 50px #9b59b6;
+        animation-delay: -6s;
+    }
+
+    @keyframes stroke {
+        100% {
+            stroke-dashoffset: -400;
+        }
+    }
+</style>
+</html>

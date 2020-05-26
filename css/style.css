@@ -530,176 +530,176 @@ a {
 }
 @-moz-keyframes foo {
   0% {
-    color: #5d8221;
-    left: 1px;
-    top: -2px;
+    color: #1d66a1;
+    left: -1px;
+    top: 1px;
     text-shadow: 1px 4px 0px #ddd;
   }
   29% {
-    color: #5d8221;
-    left: 1px;
-    top: -2px;
+    color: #1d66a1;
+    left: -1px;
+    top: 1px;
     text-shadow: 1px 4px 0px #ddd;
   }
   30% {
-    color: #8b5c6f;
-    left: -1px;
-    top: 0px;
+    color: #703a99;
+    left: 1px;
+    top: -1px;
     text-shadow: 3px 3px 0px #ddd;
   }
   59% {
-    color: #8b5c6f;
-    left: -1px;
-    top: 0px;
+    color: #703a99;
+    left: 1px;
+    top: -1px;
     text-shadow: 3px 3px 0px #ddd;
   }
   60% {
-    color: #311dc2;
-    left: 0px;
-    top: -3px;
+    color: #906a23;
+    left: 2px;
+    top: 3px;
     text-shadow: 1px 2px 0px #ddd;
   }
   99% {
-    color: #311dc2;
-    left: 0px;
-    top: -3px;
+    color: #906a23;
+    left: 2px;
+    top: 3px;
     text-shadow: 1px 2px 0px #ddd;
   }
   100% {
-    color: #5d8221;
-    left: 1px;
+    color: #1d66a1;
+    left: -1px;
     top: randomOffsetY;
     text-shadow: 1px 4px 0px #ddd;
   }
 }
 @-webkit-keyframes foo {
   0% {
-    color: #5d8221;
-    left: 1px;
-    top: -2px;
+    color: #1d66a1;
+    left: -1px;
+    top: 1px;
     text-shadow: 1px 4px 0px #ddd;
   }
   29% {
-    color: #5d8221;
-    left: 1px;
-    top: -2px;
+    color: #1d66a1;
+    left: -1px;
+    top: 1px;
     text-shadow: 1px 4px 0px #ddd;
   }
   30% {
-    color: #8b5c6f;
-    left: -1px;
-    top: 0px;
+    color: #703a99;
+    left: 1px;
+    top: -1px;
     text-shadow: 3px 3px 0px #ddd;
   }
   59% {
-    color: #8b5c6f;
-    left: -1px;
-    top: 0px;
+    color: #703a99;
+    left: 1px;
+    top: -1px;
     text-shadow: 3px 3px 0px #ddd;
   }
   60% {
-    color: #311dc2;
-    left: 0px;
-    top: -3px;
+    color: #906a23;
+    left: 2px;
+    top: 3px;
     text-shadow: 1px 2px 0px #ddd;
   }
   99% {
-    color: #311dc2;
-    left: 0px;
-    top: -3px;
+    color: #906a23;
+    left: 2px;
+    top: 3px;
     text-shadow: 1px 2px 0px #ddd;
   }
   100% {
-    color: #5d8221;
-    left: 1px;
+    color: #1d66a1;
+    left: -1px;
     top: randomOffsetY;
     text-shadow: 1px 4px 0px #ddd;
   }
 }
 @-o-keyframes foo {
   0% {
-    color: #5d8221;
-    left: 1px;
-    top: -2px;
+    color: #1d66a1;
+    left: -1px;
+    top: 1px;
     text-shadow: 1px 4px 0px #ddd;
   }
   29% {
-    color: #5d8221;
-    left: 1px;
-    top: -2px;
+    color: #1d66a1;
+    left: -1px;
+    top: 1px;
     text-shadow: 1px 4px 0px #ddd;
   }
   30% {
-    color: #8b5c6f;
-    left: -1px;
-    top: 0px;
+    color: #703a99;
+    left: 1px;
+    top: -1px;
     text-shadow: 3px 3px 0px #ddd;
   }
   59% {
-    color: #8b5c6f;
-    left: -1px;
-    top: 0px;
+    color: #703a99;
+    left: 1px;
+    top: -1px;
     text-shadow: 3px 3px 0px #ddd;
   }
   60% {
-    color: #311dc2;
-    left: 0px;
-    top: -3px;
+    color: #906a23;
+    left: 2px;
+    top: 3px;
     text-shadow: 1px 2px 0px #ddd;
   }
   99% {
-    color: #311dc2;
-    left: 0px;
-    top: -3px;
+    color: #906a23;
+    left: 2px;
+    top: 3px;
     text-shadow: 1px 2px 0px #ddd;
   }
   100% {
-    color: #5d8221;
-    left: 1px;
+    color: #1d66a1;
+    left: -1px;
     top: randomOffsetY;
     text-shadow: 1px 4px 0px #ddd;
   }
 }
 @keyframes foo {
   0% {
-    color: #5d8221;
-    left: 1px;
-    top: -2px;
+    color: #1d66a1;
+    left: -1px;
+    top: 1px;
     text-shadow: 1px 4px 0px #ddd;
   }
   29% {
-    color: #5d8221;
-    left: 1px;
-    top: -2px;
+    color: #1d66a1;
+    left: -1px;
+    top: 1px;
     text-shadow: 1px 4px 0px #ddd;
   }
   30% {
-    color: #8b5c6f;
-    left: -1px;
-    top: 0px;
+    color: #703a99;
+    left: 1px;
+    top: -1px;
     text-shadow: 3px 3px 0px #ddd;
   }
   59% {
-    color: #8b5c6f;
-    left: -1px;
-    top: 0px;
+    color: #703a99;
+    left: 1px;
+    top: -1px;
     text-shadow: 3px 3px 0px #ddd;
   }
   60% {
-    color: #311dc2;
-    left: 0px;
-    top: -3px;
+    color: #906a23;
+    left: 2px;
+    top: 3px;
     text-shadow: 1px 2px 0px #ddd;
   }
   99% {
-    color: #311dc2;
-    left: 0px;
-    top: -3px;
+    color: #906a23;
+    left: 2px;
+    top: 3px;
     text-shadow: 1px 2px 0px #ddd;
   }
   100% {
-    color: #5d8221;
-    left: 1px;
+    color: #1d66a1;
+    left: -1px;
     top: randomOffsetY;
     text-shadow: 1px 4px 0px #ddd;
   }

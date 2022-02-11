@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Trade Lab</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="css/element.css">
+    <style type="text/css">
+        .checked {
+            color: gold;
+            text-shadow: yellow 1px 0px 6px;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <el-card class="box-card" style="margin: 1em">
+        <div slot="header" class="clearfix">
+            <span>Config</span>
+        </div>
+        <el-form :inline="true" class="demo-form-inline">
+            <el-form-item label="WS Address">
+                <el-input v-model="wsAddress" placeholder="WS Address"></el-input>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" v-on:click="connect" v-loading="connectLoading">Connect</el-button>
+            </el-form-item>
+            <el-form-item label="Config">
+                <el-select v-model="configName" placeholder="Select Config">
+                    <el-option
+                            v-for="item in configs"
+                            :key="item"
+                            :label="item"
+                            :value="item">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" v-on:click="start" v-loading="startLoading" v-bind:disabled="startDisabled">
+                    {{startLabel}}
+                </el-button>
+                <el-button type="danger" v-on:click="forceStop" v-show="forceStopVisible">
+                    Force Stop
+                </el-button>
+            </el-form-item>
+        </el-form>
+    </el-card>
+
+    <div v-for="strategy in strategyList" v-show="showStrategyList()">
+        <el-card class="box-card" style="margin: 1em">
+            <div slot="header" class="clearfix">
+                <span>{{strategy.name}}</span>
+                <!--                <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>-->
+            </div>
+
+            <el-table
+                    :data="strategy.assetBalanceStrategyList"
+                    style="width: 100%">
+                <el-table-column
+                        prop="state"
+                        label="state">
+                    <template slot-scope="scope">
+                        <i class="el-icon-s-opportunity" v-bind:class="statusIndicator(scope.row.state)"
+                           style="font-size: 1.5em"></i>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                        prop="product"
+                        label="product">
+                </el-table-column>
+                <el-table-column
+                        align="right"
+                        prop="price"
+                        label="price"
+                :formatter="decimalFormatter">
+                </el-table-column>
+                <el-table-column
+                        align="right"
+                        prop="value"
+                        label="value"
+                        :formatter="decimalFormatter">
+                </el-table-column>
+                <el-table-column
+                        align="right"
+                        prop="amount"
+                        label="amount"
+                        :formatter="decimalFormatter">
+                </el-table-column>
+                <el-table-column
+                        align="center"
+                        prop="progress"
+                        label="progress">
+                    <template slot-scope="scope">
+                        <el-progress :text-inside="true" :stroke-width="26"
+                                     :percentage="parseInt(scope.row.progress * 100)"></el-progress>
+                    </template>
+                </el-table-column>
+            </el-table>
+
+        </el-card>
+    </div>
+
+
+</div>
+</body>
+</html>
+<!-- 开发环境版本，包含了有帮助的命令行警告 -->
+<script src="js/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="js/element.js"></script>
+
+<script>
+    const TYPE_CONFIG = 'config'
+    const ACTION_CONFIG_LIST = "action_config_list"
+
+    const TYPE_CONTROL = "control"
+    const ACTION_CONTROL_START = "action_control_start"
+    const ACTION_CONTROL_STOP = "action_control_stop"
+
+    const TYPE_SYNC_STATUS = "sync_asset_status"
+    const CONTENT_SYNC_STATUS_STOP = "stop"
+    const CONTENT_SYNC_STATUS_STARTING = "starting"
+    const CONTENT_SYNC_STATUS_STARTED = "started"
+
+    const TYPE_SYNC_STRATEGY = "sync_asset_strategy"
+
+    const TYPE_SYNC = "sync"
+
+    var ws
+    var app = new Vue({
+        el: '#app',
+        data: {
+            wsAddress: '6.tcp.ngrok.io:17105',
+            startLabel: 'Start',
+            startDisabled: true,
+            status: CONTENT_SYNC_STATUS_STOP,
+            startLoading: false,
+            connectLoading: false,
+            forceStopVisible: false,
+            configName: '',
+            configs: [],
+            strategyList: [
+                {
+                    name: 'name',
+                    assetBalanceStrategyList: [
+                        {
+                            state: true,
+                            product: 'XXX',
+                            price: 0,
+                            value: 0,
+                            amount: 0,
+                            progress: 0.6,
+                        }
+                    ]
+                }
+            ],
+            value: ''
+        },
+        created: function () {
+            this.status = CONTENT_SYNC_STATUS_STOP
+        },
+        methods: {
+            decimalFormatter:function(row,column,cell){
+                return cell.toFixed(4)
+            },
+            statusIndicator: function (isChecked) {
+                return {
+                    checked: isChecked
+                }
+            },
+            showStrategyList: function () {
+                return this.status == CONTENT_SYNC_STATUS_STARTED
+            },
+            connect: function () {
+                this.connectLoading = true
+                ws = newWebSocket(this.wsAddress)
+            },
+            start: function () {
+                this.startLoading = true
+                if (this.status == CONTENT_SYNC_STATUS_STOP) {
+                    var msg = {
+                        type: TYPE_CONTROL,
+                        param: 'action=' + ACTION_CONTROL_START + "&configName=" + this.configName
+                    }
+                    ws.send(JSON.stringify(msg))
+                } else if (this.status == CONTENT_SYNC_STATUS_STARTED) {
+                    var msg = {
+                        type: TYPE_CONTROL,
+                        param: 'action=' + ACTION_CONTROL_STOP
+                    }
+                    ws.send(JSON.stringify(msg))
+                }
+            },
+            forceStop: function () {
+                if (this.status == CONTENT_SYNC_STATUS_STOP) return
+                var msg = {
+                    type: TYPE_CONTROL,
+                    param: 'action=' + ACTION_CONTROL_STOP
+                }
+                ws.send(JSON.stringify(msg))
+            }
+        }
+    })
+
+    function newWebSocket(wsAddress) {
+        let ws = new WebSocket('ws://' + wsAddress)
+
+        ws.onopen = function () {
+            var msg = {
+                type: TYPE_CONFIG,
+                param: 'action=' + ACTION_CONFIG_LIST
+            }
+            ws.send(JSON.stringify(msg))
+            msg = {
+                type: TYPE_SYNC,
+            }
+            ws.send(JSON.stringify(msg))
+            app.connectLoading = false
+        }
+
+        ws.onerror = function () {
+            app.connectLoading = false
+        }
+
+        ws.onmessage = function (originMsg) {
+            var msg = JSON.parse(originMsg.data);
+            switch (msg.type) {
+                case TYPE_SYNC_STATUS:
+                    app.status = msg.content
+                    updateStartButton()
+                    break
+                case TYPE_CONFIG:
+                    app.configs = msg.content
+                    app.configName = msg.content[0]
+                    app.startDisabled = false
+                    break;
+                case TYPE_SYNC:
+                    app.configName = msg.content.configName
+                    app.status = msg.content.status
+                    updateStartButton()
+                    break;
+                case TYPE_SYNC_STRATEGY:
+                    if (app.showStrategyList()) {
+                        app.strategyList = msg.content
+                        // console.log(msg.content)
+                    }
+                    break;
+            }
+
+        }
+
+        return ws
+    }
+
+    function updateStartButton() {
+        switch (app.status) {
+            case CONTENT_SYNC_STATUS_STOP:
+                app.startLoading = false
+                app.startLabel = "Start"
+                app.forceStopVisible = false
+                break
+            case CONTENT_SYNC_STATUS_STARTING:
+                setTimeout(() => {
+                    if (app.status != CONTENT_SYNC_STATUS_STARTED) {
+                        app.forceStopVisible = true
+                    }
+                }, 10000)
+                break
+            case CONTENT_SYNC_STATUS_STARTED:
+                app.startLoading = false
+                app.startLabel = "Stop"
+                app.forceStopVisible = false
+                break
+        }
+    }
+</script>
